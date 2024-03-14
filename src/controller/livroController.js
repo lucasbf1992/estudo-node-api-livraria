@@ -1,5 +1,6 @@
 import livro from "../models/Livro.js";
 import { autor } from "../models/Autor.js";
+import NaoEncontrado from "../config/erros/NaoEncontrado.js";
 
 class LivroController {
 
@@ -18,8 +19,13 @@ class LivroController {
     try {
       const id = req.params.id;
       const livroEncontrado = await livro.findById(id);
-            
-      res.status(200).json(livroEncontrado);
+
+      if (livroEncontrado !== null) {
+        res.status(200).json(livroEncontrado);
+      } else {
+        next(new NaoEncontrado("Id do livro não localizado."));
+      }
+                
     } catch (erro) { 
       next(erro);
     }        
@@ -46,12 +52,16 @@ class LivroController {
   static async atualizarLivro(req, res, next) {
     try {            
       const id = req.params.id;
-      console.log(id);
-      await livro.findByIdAndUpdate(id, req.body);
-            
-      res.status(200).json({
-        message: `Livro#${id} alterado com sucesso`,                
-      });
+      
+      const livroResultado = await livro.findByIdAndUpdate(id, req.body);
+           
+      if (livroResultado !== null) {
+        res.status(200).json({
+          message: `Livro#${id} alterado com sucesso`,                
+        });
+      } else {
+        next(new NaoEncontrado("Id do livro não localizado."));
+      }
     } catch (erro) { 
       next(erro);
     }        
@@ -60,11 +70,15 @@ class LivroController {
   static async excluirLivro(req, res, next) {
     try {            
       const id = req.params.id;
-      await livro.findByIdAndDelete(id);
-            
-      res.status(200).json({
-        message: `Livro#${id} excluído com sucesso`,                
-      });
+      const livroResultado = await livro.findByIdAndDelete(id);
+         
+      if (livroResultado !== null) {
+        res.status(200).json({
+          message: `Livro#${id} excluído com sucesso`,                
+        });
+      } else {
+        next(new NaoEncontrado("Id do livro não localizado."));
+      }
     } catch (erro) { 
       next(erro);
     }        
