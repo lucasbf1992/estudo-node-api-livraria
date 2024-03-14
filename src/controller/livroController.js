@@ -3,38 +3,35 @@ import { autor } from "../models/Autor.js";
 
 class LivroController {
 
-  static async listarLivros(req, res) {
+  static async listarLivros(req, res, next) {
     try {
       const listaLivros = await livro.find({});
             
       res.status(200).json(listaLivros);
     } catch (erro) { 
-      res.status(500).json({
-        message: `${erro.message} - Falha ao listar livros`                
-      });
+      next(erro);
     }
         
   }
 
-  static async listarLivroPorId(req, res) {
+  static async listarLivroPorId(req, res, next) {
     try {
       const id = req.params.id;
       const livroEncontrado = await livro.findById(id);
             
       res.status(200).json(livroEncontrado);
     } catch (erro) { 
-      res.status(500).json({
-        message: `${erro.message} - Falha ao lista livro por id`                 
-      });
+      next(erro);
     }        
   }
 
-  static async cadastrarLivro(req, res) {
+  static async cadastrarLivro(req, res, next) {
     const novoLivro = req.body;
     try {
       const autorEncontrado = await autor.findById(novoLivro.autor);
+      
       const livroCompleto = {
-        ...novoLivro, autor: { ...autorEncontrado._doc }
+        ...novoLivro, autor: { ...autorEncontrado?._doc }
       };
       const livroCriado = await livro.create(livroCompleto);
       res.status(201).json({
@@ -42,13 +39,11 @@ class LivroController {
         livro: livroCriado
       });
     } catch (erro) {
-      res.status(500).json({
-        message: `${erro.message} - Falha ao cadastrar livro`                
-      });
+      next(erro);
     }        
   }
 
-  static async atualizarLivro(req, res) {
+  static async atualizarLivro(req, res, next) {
     try {            
       const id = req.params.id;
       console.log(id);
@@ -58,13 +53,11 @@ class LivroController {
         message: `Livro#${id} alterado com sucesso`,                
       });
     } catch (erro) { 
-      res.status(500).json({
-        message: `${erro.message} - Falha ao alterar livro`                 
-      });
+      next(erro);
     }        
   }
 
-  static async excluirLivro(req, res) {
+  static async excluirLivro(req, res, next) {
     try {            
       const id = req.params.id;
       await livro.findByIdAndDelete(id);
@@ -73,9 +66,7 @@ class LivroController {
         message: `Livro#${id} excluído com sucesso`,                
       });
     } catch (erro) { 
-      res.status(500).json({
-        message: `${erro.message} - Falha ao excluir livro`                 
-      });
+      next(erro);
     }        
   }
 

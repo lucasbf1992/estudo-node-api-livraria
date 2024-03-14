@@ -1,6 +1,7 @@
 import express from "express";
 import conectarBancoDeDados from "./config/dbConnect.js";
 import routes from "./routes/index.js";
+import manipuladorDeErros from "./middlewares/manipuladorDeErros.js";
 
 const conexaoBanco = await conectarBancoDeDados();
 
@@ -14,6 +15,9 @@ conexaoBanco.once("open", () => {
 
 const app = express();
 routes(app);
+
+// eslint-disable-next-line no-unused-vars
+app.use(manipuladorDeErros);
     
 export default app;
 
