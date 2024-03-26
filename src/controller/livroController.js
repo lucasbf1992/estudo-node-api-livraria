@@ -1,34 +1,15 @@
 import { livro, autor } from "../models/index.js";
 import NaoEncontrado from "../config/erros/NaoEncontrado.js";
-import RequisicaoIncorreta from "../config/erros/RequisicaoIncorreta.js";
 
 class LivroController {
 
   static async listarLivros(req, res, next) {
     try {
-      let { limite = 5, pagina = 1, ordenacao = "_id:-1" } = req.query;
+      const buscaLivros = livro.find();
 
-      let [campoOrdenacao, ordem] = ordenacao.split(":");
+      req.resultado = buscaLivros;
 
-      limite = parseInt(limite);
-      pagina = parseInt(pagina);
-      ordem = parseInt(ordem);
-      
-      if (limite > 0 && pagina > 0) {
-        const listaLivros = await livro.find()
-          .sort({
-            [campoOrdenacao]: ordem            
-          })
-          .skip(limite * (pagina - 1))
-          .limit(limite)
-          .populate("autor")          
-          .exec();
-          
-        res.status(200).json(listaLivros);
-      } else {
-        next(new RequisicaoIncorreta());
-      }
-
+      next();
     } catch (erro) { 
       next(erro);
     }
@@ -104,7 +85,7 @@ class LivroController {
     }        
   }
 
-  static async listarLivrosPorFiltro(req, res) {    
+  static async listarLivrosPorFiltro(req, res, next) {    
     const busca = await processaBusca(req.query);
 
     try {   
@@ -113,11 +94,13 @@ class LivroController {
         return;
       }         
       
-      const livrosPorEditora = await livro
+      const livrosResultado = livro
         .find(busca)
         .populate("autor");
-            
-      res.status(200).json(livrosPorEditora);
+
+      req.resultado = livrosResultado;
+
+      next();                 
     } catch (erro) { 
       res.status(500).json({
         message: `${erro.message} - Falha na busca`                
